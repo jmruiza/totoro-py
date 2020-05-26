@@ -245,12 +245,52 @@ def analizeDefinition(path_file):
         if me == "locale":
             definition[me] = {"word": "translation"}
             continue
+        elif me == "models":
+            models = _definition.get(me)
+
+            model_props = {}
+            field_props = {}
+            field_relations = {}
+            field_validations = []
+            #field_val_errors = []
+            #field_faker = []
+
+            for m in models:
+                model = models.get(m)
+                for mk in list(model.keys()):
+                    # Save distinct field props
+                    if not bool(mk in model_props):
+                        model_props[mk] = str(type(model.get(mk)))
+
+                    # Extract props for fields
+                    if mk == "fields":
+                        field = model[mk]
+                        for fp in list(field.keys()):
+                            props = field.get(fp)
+                            for p in props:
+                                # Save distinct field props
+                                if not bool(p in field_props):
+                                    field_props[p] = str(type(props.get(p)))
+
+                    # Extract props for fields
+                    if mk == "relations":
+                        relations = model[mk]
+                        if bool(relations.keys()):
+                            for r in list(relations.keys()):
+                                if not bool(r in field_relations):
+                                    field_relations[r] = str(type(relations.get(r)))
+
+            print("modelprops", json.dumps(model_props, sort_keys=True, indent=4))
+            print("fieldprops", json.dumps(field_props, sort_keys=True, indent=4))
+            print("fieldrelations", json.dumps(field_relations, sort_keys=True, indent=4))
+
         else:
             definition[me] = {}
             parent = _definition.get(me)
-
+        '''
         for ch in parent:
             definition[me][ch] = analizeChild(ch, parent.get(ch))
+        '''
 
     print(definition)
 
